@@ -22,7 +22,7 @@ A=np.array([[0,0.5],[0.5,0]])
 B=np.array([[0,-0.05],[-0.05,0.0]])
 C=np.array([[0.0,0.01],[0.01,0.0]])
 D=np.array([[0.005,0.0],[0.0,0.01]])
-sigma=0.8
+sigma=0.6
 xx=[[0,1,0,1],[1,0,0,0],[0,0,0,1],[1,0,1,0]]
 yy=xx
 xy=np.array([[0.5,0.5,0,0],[0,0.5,0.5,0],[0,0,0.5,0.5],[0.5,0,0,0.5]])
@@ -114,7 +114,7 @@ class sensor():
             observe=h*np.array(location[2:4])+np.random.randn(1,2)*q
         temp=[observe[0,0]-h*self.x,observe[0,1]-h*self.y]
 
-        self.k=0.5*np.eye(2)
+        #self.k=0.5*np.eye(2)
         #if self.i<50:
         #    print observe,du,thissum,temp
         if self.flag==1:
@@ -222,46 +222,46 @@ if __name__=="__main__":
     #print group1[0].record
     #print '------------'
     #print group1[0].send
-    plt.plot(location[1:1000,0],location[1:1000,1],color='g',label="location of x")
-    plt.plot(location[1:1000,2],location[1:1000,3],color='b',label="location of y")
+    plt.plot(location[1:1000,0],location[1:1000,1],color='g',label=r"$ x$-group")
+    plt.plot(location[1:1000,2],location[1:1000,3],color='b',label=r"$ y$-group",linestyle="--")
 #    plt.plot(group1[0].record[:,0],group1[0].record[:,1])
     for i in range(numOfGroup1):
         plt.plot(group1[i].record[:1000,0],group1[i].record[:1000,1])
     for i in range(numOfGroup2):
-        plt.plot(group2[i].record[:1000,0],group2[i].record[:1000,1])
+        plt.plot(group2[i].record[:1000,0],group2[i].record[:1000,1],linestyle="--")
     print location[step-1]
     ansx=[wholeGroup[i].record[0,0] for i in range(numOfGroup1)]
     ansy=[wholeGroup[i].record[0,1] for i in range(numOfGroup1)]
     plt.scatter(ansx,ansy,color='r')
+    dic={0:r"$\sigma=0.4$",1:r"$\sigma=0.6$",2:r"$\sigma=0.6$"}
 
     init_x=[wholeGroup[i+4].record[0,0] for i in range(numOfGroup2)]
     init_y=[wholeGroup[i+4].record[0,1] for i in range(numOfGroup2)]
     plt.scatter(init_x,init_y,color='r')
-    plt.title("location of targets and sensors")
+    plt.title("Trajectories of targets and sensors ({})".format(dic[2]))
     plt.legend(loc="upper left")
     #plt.plot(wholeGroup[0].record[:,0],wholeGroup[0].record[:,1])
     plt.show()
     error=np.array([0.0 for i in range(step)])
 
-    dic={0:r"$\sigma=0.4$",1:r"$\sigma=0.6$",2:r"$\sigma=0.8$"}
     plt.figure("MSE")
-    plt.title(r"mean square error at {}".format(dic[2]))
+    plt.title(r"Mean square error ({})".format(dic[2]))
     plt.ylim((0,10))
     plt.xlabel("steps")
     plt.ylabel("MSE")
     for j in range(step):
         error[j]=sum([sum((group1[i].record[j]-location[j,0:2])**2) for i in range(numOfGroup1)])/numOfGroup1
-    plt.plot(range(step),error,label="x-group")
+    plt.plot(range(step),error,label=r"$ x$-group")
     for j in range(step):
         error[j]=sum([sum((group2[i].record[j]-location[j,2:4])**2) for i in range(numOfGroup2)])/numOfGroup2
-    plt.plot(range(step),error,label="y-group")
+    plt.plot(range(step),error,label=r"$ y$-group",linestyle="--")
     plt.legend()
     plt.show()
     tigger_counter=[]
     for i in range(numOfGroup1+numOfGroup2):
         tigger_counter.append(wholeGroup[i].counter)
-    plt.figure("triggered_times")
-    plt.title("triggered_times")
+    plt.figure("Triggered_times")
+    plt.title(r"Triggered times ({})".format(dic[2]))
     plt.grid()
     plt.xlabel("Node Number")
     plt.ylabel("Times")
