@@ -5,18 +5,19 @@
 
 import numpy as np
 from scipy.special import gamma
+import matplotlib.pyplot as plt
 
 ## 可调的参数 维度，分数阶数，智能体数量, 邻接矩阵,步数,系数
 dimension=3
 alpha=0.5
 amount=5
-adj=np.array([[0,0,0,0,0],
+adj=np.array([[0,1,0,0,0],
               [1,0,0,1,0],
               [1,0,0,0,1],
               [0,0,1,0,0],
               [0,0,0,1,0]])
 h=0.01                      #仿真步长
-time=20                     #仿真时间
+time=5                     #仿真时间
 steps=int(time/0.01)
 k=[1,3,2]
 firstGroup=[0,1]            #一阶个体
@@ -33,7 +34,9 @@ class agent(object):
         self.tags=tags
         self.record=np.array([np.array([0.0 for i in range(dimension)]) for j in range(steps)])
         self.record[0]+=self.states
-        self.omega=np.array([0.0 for i in range(amount)])
+        self.omega=np.array([0.0 for i in range(dimension)])
+        self.record_omega=np.array([np.array([0.0 for i in range(dimension)]) for j in range(steps)])
+        self.record_omega[0]+=self.omega
         self.network=network
         self.gain=0
         if self.tags in firstGroup:
@@ -44,23 +47,26 @@ class agent(object):
 
     def next(self):
         u=self._communication()
-        if self.tags not in firstGroup:
-            pass
+        u-=k[2]*self.omega
         self._update(u)
 
     def _update(self,u):
+        """分数阶积分\frac{1}{\gamma{\alpha}}\interga_{t_0}^{t}(t-\tao)^{\alpha-1}f(\tao)d\tao
+        对于数值系统t-t_0=h f(\tao)=f(t_0),由此求出数值解"""
         if self.tags in firstGroup:
-            pass
+            self.states+=u*(h**alpha)/(alpha*self.gamma)
         else:
-            pass
+            self.omega+=u*(h**alpha)/(alpha*self.gamma)
+            self.states+=self.omega*(h**alpha)/(alpha*self.gamma)
         self.record[self.index]+=self.states
+        self.record_omega[self.index]+=self.omega
         self.index+=1
 
     def _communication(self):
         u=np.array([0.0 for i in range(dimension)])
         for neighbor in self.network.nodes:
             u+=adj[self.tags][neighbor.tags]*(neighbor.record[self.index-1]-self.states)
-        return self.k*u
+        return self.gain*u
 
 class Network(object):
     """通过for in 一个Network不断向前迭代，所有的节点信息储存在Network中 """
@@ -83,7 +89,21 @@ class Network(object):
         self.index+=1
         return self.index
 
+def plotNetwork(network):
+    for d in range(dimension):
+        plt.figure("states_of_dimension_{}".format(d))
+        for node in network.nodes:
+            plt.plot(range(steps), node.record[:,d])
+        plt.show()
+
+    for d in range(dimension):
+        plt.figure("omega_of_dimension_{}".format(d))
+        for node in network.nodes:
+            plt.plot(range(steps), node.record_omega[:,d])
+        plt.show()
+
 if __name__ == "__main__":
     network=Network()
     for step in network:
         print step
+    plotNetwork(network)
