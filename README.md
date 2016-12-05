@@ -12,7 +12,8 @@
 
 + 分数阶仿真问题
 		
-		1. yyySimulation.py
+		1. fractionalSystem.py
+		2. fractionalSystem_cp35_version.py
 	
 	这一个仿真应该是我做的最后的算法仿真工作了，目测也是我最好的一个，对于多智能体问题的封装我觉得已经到极限了，如果以后有新的算法只需要改动 agent::_update和agent::next函数就可以。而且用了Iterator的思想，算法迭代起来更方便。可惜我的师弟师妹们都不用python，目测它只能安安静静的躺在这里了。
 	
