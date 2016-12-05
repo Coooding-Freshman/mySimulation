@@ -1,15 +1,15 @@
 #!/usr/bin/python
 #-*- coding: UTF-8 -*-
 
-#Author: Lizhenghao
+#Author: Li Zhenghao
 
 import numpy as np
 from scipy.special import gamma
 import matplotlib.pyplot as plt
 
-## 可调的参数 维度，分数阶数，智能体数量, 邻接矩阵,步数,系数
-dimension=3
-alpha=0.5
+## 可调的参数 维度，分数阶数，智能体数量, 邻接矩阵,步数...######
+dimension=2
+alpha=0.7
 amount=5
 adj=np.array([[0,1,0,0,0],
               [1,0,0,1,0],
@@ -45,7 +45,7 @@ class agent(object):
             self.gain=k[1]
         self.index=1
 
-    def next(self):
+    def __next__(self):
         u=self._communication()
         u-=k[2]*self.omega
         self._update(u)
@@ -80,24 +80,25 @@ class Network(object):
     def __iter__(self):
         return self
 
-    def next(self):
+    def __next__(self):
         """不断向前迭代自己的节点，超过steps停止"""
         if self.index >= steps:
             raise StopIteration("Steps have completed!")
         for agent in self.nodes:
-            agent.next()
+            next(agent)
         self.index+=1
         return self.index
 
 def plotNetwork(network):
+    mp={0:"first",1:"second",2:"third"}
     for d in range(dimension):
-        plt.figure("states_of_dimension_{}".format(d))
+        plt.figure("States_of_the_{}_dimension".format(mp[d]))
         for node in network.nodes:
             plt.plot(range(steps), node.record[:,d])
         plt.show()
 
     for d in range(dimension):
-        plt.figure("omega_of_dimension_{}".format(d))
+        plt.figure("Omega_of_the_{}_dimension".format(mp[d]))
         for node in network.nodes:
             plt.plot(range(steps), node.record_omega[:,d])
         plt.show()
@@ -105,5 +106,5 @@ def plotNetwork(network):
 if __name__ == "__main__":
     network=Network()
     for step in network:
-        print step
+        print(step)
     plotNetwork(network)

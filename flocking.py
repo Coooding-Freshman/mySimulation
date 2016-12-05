@@ -2,7 +2,7 @@
 """
 Created on Fri May 13 03:44:14 2016
 
-@author: Administrator
+@author: Li Zhenghao
 """
 
 import numpy as np
@@ -177,6 +177,5 @@ if __name__=="__main__":
         for i in range(2):
             lens=np.sqrt(track[end,i*2]**2+track[end,i*2+1])
             plt.arrow(local[end,i*2],local[end,i*2+1],track[end,i*2]/lens,track[end,i*2+1]/lens,head_width=0.5,head_length=0.5,fc='k',ec='k')
-        #plt.legend((follower1,follower2,target1),("agent in x group","agent in y group","target"),loc='upper left')
         plt.legend(loc="upper left")
         plt.show()
