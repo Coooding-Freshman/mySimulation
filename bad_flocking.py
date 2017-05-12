@@ -1,9 +1,11 @@
+#!/usr/local/bin/python
 # -*- coding: utf-8 -*-
 """
 Created on Fri May 13 03:44:14 2016
 
 @author: Administrator
 """
+
 
 import numpy as np
 import scipy.integrate as integrate
