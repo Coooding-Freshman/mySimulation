@@ -22,7 +22,7 @@ A = np.array([[0, 0.5], [0.5, 0]])
 B = np.array([[0, -0.05], [-0.05, 0.0]])
 C = np.array([[0.0, 0.01], [0.01, 0.0]])
 D = np.array([[0.005, 0.0], [0.0, 0.01]])
-sigma = 0.4
+sigma = 0.6
 xx = [[0, 1, 0, 1], [1, 0, 0, 0], [0, 0, 0, 1], [1, 0, 1, 0]]
 yy = xx
 xy = np.array(
@@ -69,6 +69,13 @@ def targetDynamical2(para):
     return ret
 
 
+def Dynamical1(para):
+    ret = np.dot(A, para[0:2])# + np.dot(C, para[2:4])
+    return ret
+def Dynamical2(para):
+    ret = np.dot(B, para[2:4])# + np.dot(D, para[0:2])
+    return ret
+
 class sensor():
     tag = 0
 
@@ -86,9 +93,9 @@ class sensor():
         self.send = np.array([np.array([0.0, 0.0]) for i in range(step)])
         self.send[0] = self.record[0]
         if self.flag == 1:
-            self.dynamic = targetDynamical1
+            self.dynamic = Dynamical1
         else:
-            self.dynamic = targetDynamical2
+            self.dynamic = Dynamical2
         self.i = 0
         self.k = np.eye(2) * 0.25
         self.sendk = copy.deepcopy(self.k)
@@ -118,21 +125,19 @@ class sensor():
             du = self.dynamic(
                 np.concatenate((othersum, np.array([self.x, self.y]))))
 
+        # change 0.25 to K
         if self.flag == 1:
             observe = h * np.array(location[0:2]) + np.random.randn(1, 2) * q
         else:
             observe = h * np.array(location[2:4]) + np.random.randn(1, 2) * q
         temp = [observe[0, 0] - h * self.x, observe[0, 1] - h * self.y]
 
-        #self.k=0.5*np.eye(2)
         if self.flag == 1:
             ret = np.dot(self.k, np.array(temp)) + du + 0.02 * np.dot(
                 A, thissum)  #+0.25*np.array(temp)
         else:
             ret = np.dot(self.k, np.array(temp)) + du + 0.02 * np.dot(
                 B, thissum)  #+0.25*np.array(temp) self.update(ret)
-        if self.flag == 1 and self.tag == 1:
-            print ret - observe[0:2]
         self.update(ret)
         self._updataPK(group)
         return ret
@@ -189,9 +194,6 @@ class sensor():
                 self.k, self.k) * q + np.dot(np.dot(D, sump),
                                              D.transpose()) + g_ij * add_term
         self.k = ansk
-        if self.tag == 1 and self.flag == 1:
-            #    print self.pij
-            print self.p
         self.p = ansp
 
     def cal_distance(self, agent):
@@ -266,17 +268,17 @@ if __name__ == "__main__":
     ansy = [wholeGroup[i].record[0, 1] for i in range(numOfGroup1)]
     plt.scatter(ansx, ansy, color='r')  # init location
 
-    dic = {0: r"$\sigma=0.4$", 1: r"$\sigma=0.6$", 2: r"$\sigma=0.8$", 3: r"$\sigma=1.0$"}
+    dic = {0: r"$\sigma=0.4$", 1: r"$\sigma=0.6$", 2: r"$\sigma=0.6$"}
     init_x = [wholeGroup[i + 4].record[0, 0] for i in range(numOfGroup2)]
     init_y = [wholeGroup[i + 4].record[0, 1] for i in range(numOfGroup2)]
     plt.scatter(init_x, init_y, color='r')
-    plt.title("Trajectories of targets and sensors ({})".format(dic[0]))
+    plt.title("Trajectories of targets and sensors ({})".format(dic[2]))
     plt.legend(loc="upper left")
     plt.show()
     error = np.array([0.0 for i in range(step)])
 
     plt.figure("MSE")
-    plt.title(r"Mean square error ({})".format(dic[0]))
+    plt.title(r"Mean square error ({})".format(dic[2]))
     plt.ylim((0, 10))
     plt.xlabel("steps")
     plt.ylabel("MSE")
@@ -299,7 +301,7 @@ if __name__ == "__main__":
     for i in range(numOfGroup1 + numOfGroup2):
         tigger_counter.append(wholeGroup[i].counter)
     plt.figure("Triggered_times")
-    plt.title(r"Triggered times ({})".format(dic[0]))
+    plt.title(r"Triggered times ({})".format(dic[2]))
     plt.grid()
     plt.xlabel("Node Number")
     plt.ylabel("Times")
